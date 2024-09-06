@@ -105,3 +105,6 @@ class QuizGame:
         if question_index is not None and answer:
             self.client_answers[client_address][question_index] = answer
             print(f"Client {client_address} answered question {question_index} with {answer}")
+    
+    def get_score(self, player_id):
+        return self.player_scores.get(player_id, 0)

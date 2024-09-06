@@ -2,62 +2,87 @@ html, body {
 	position: relative;
 	width: 100%;
 	height: 100%;
-}
-
-body {
-	color: #333;
 	margin: 0;
-	padding: 8px;
-	box-sizing: border-box;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-}
-
-a {
-	color: rgb(0,100,200);
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
-}
-
-a:visited {
-	color: rgb(0,80,160);
-}
-
-label {
-	display: block;
-}
-
-input, button, select, textarea {
-	font-family: inherit;
-	font-size: inherit;
-	-webkit-padding: 0.4em 0;
-	padding: 0.4em;
-	margin: 0 0 0.5em 0;
-	box-sizing: border-box;
-	border: 1px solid #ccc;
-	border-radius: 2px;
-}
-
-input:disabled {
-	color: #ccc;
-}
-
-button {
+	padding: 0;
+	font-family: 'Inter', sans-serif;
+	background: rgba(255, 249, 200, 0.47388);
+  }
+  
+  body {
 	color: #333;
-	background-color: #f4f4f4;
-	outline: none;
-}
-
-button:disabled {
-	color: #999;
-}
-
-button:not(:disabled):active {
-	background-color: #ddd;
-}
-
-button:focus {
-	border-color: #666;
-}
+	padding: 16px;
+	box-sizing: border-box;
+  }
+  h1{
+	text-align: center;
+  }
+  .title {
+	width: 100%;
+	text-align: center;
+	font-size: 48px;
+	line-height: 58px;
+	color: #584294;
+	margin-bottom: 16px;
+  }
+  
+  .question {
+	width: 100%;
+	text-align: center;
+	font-size: 36px;
+	line-height: 44px;
+	color: #584294;
+	margin-bottom: 24px;
+  }
+  
+  .answers-container {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 16px;
+	justify-content: center;
+	margin-bottom: 24px;
+  }
+  
+  .answer-block {
+	width: 100%;
+	height: 216px;
+	border-radius: 8px;
+	padding: 20px;
+	font-size: 24px;
+	line-height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	box-sizing: border-box;
+	background: #DFFFEC; /* Default color if none is set */
+  }
+  
+  .submit-button {
+	width: 100%;
+	max-width: 280px;
+	height: 63px;
+	background: #E2F3FF;
+	border-radius: 14px;
+	font-size: 24px;
+	line-height: 28px;
+	color: #000;
+	border: none;
+	cursor: pointer;
+	margin: 0 auto;
+	display: block;
+  }
+  
+  .submit-button:hover {
+	background-color: #c0e0ff;
+  }
+  
+  .submit-button:disabled {
+	background-color: #cccccc;
+	cursor: not-allowed;
+  }
+  
+  input[type="radio"] {
+	margin-right: 8px;
+  }
+  
+  

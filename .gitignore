@@ -124,3 +124,4 @@ instance/
 # Miscellaneous
 *.DS_Store
 *.lock
+git 
