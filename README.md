@@ -1,2 +1,0 @@
-# kahoot
-TCP-IP/svelt
