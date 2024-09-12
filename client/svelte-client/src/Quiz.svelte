@@ -69,9 +69,9 @@
   
     // Define colors for each answer
     const colors = ['#DFFFEC', '#FF9797', '#F9DADA', '#D4C6FE'];
-  </script>
+</script>
   
-  <main>
+<main>
     {#if !quizCompleted}
       <h1 class="title">Quiz Question</h1>
       <p class="question">{question}</p>
@@ -87,5 +87,4 @@
     {:else}
       <h1 class="title">{question}</h1>
     {/if}
-  </main>
-  
+</main>
