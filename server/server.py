@@ -22,10 +22,11 @@ class QuizServer:
                 if not request:
                     print("No data received. Closing connection.")
                     break
-
-                headers = request.split('\n')
+                
+                headers = request.split('\r\n')
                 method, path, _ = headers[0].split(' ')
-
+    
+                # Handle OPTIONS method
                 if method == 'OPTIONS':
                     response_header = (
                         'HTTP/1.1 200 OK\r\n'
@@ -37,7 +38,8 @@ class QuizServer:
                     )
                     client_socket.sendall(response_header.encode('utf-8'))
                     continue
-
+                
+                # Handle GET method
                 if method == 'GET':
                     if path == '/get_question':
                         if self.quiz_game.current_question < len(self.quiz_game.quizzes['general']):
@@ -77,50 +79,61 @@ class QuizServer:
                             'Connection: keep-alive\r\n\r\n'
                         )
                         client_socket.sendall(response_header.encode('utf-8') + response_body.encode('utf-8'))
-
+    
+                # Handle POST method
                 elif method == 'POST':
                     if path == '/submit_answer':
                         try:
-                            # Extract the body of the request (after the headers)
+                            # Extract the body of the request
                             body_start = request.find('\r\n\r\n') + 4
-                            body = request[body_start:]
+                            body = request[body_start:].strip()
+    
+                            # Print the raw body data
+                            print(f"Raw body data: {body}")
                             
-                            # Parse the JSON data from the body
-                            data = json.loads(body)
-                            answer = data.get('answer')
-                            print(f"Received answer from client: {answer}")
-
-                            # Handle the answer
-                            self.quiz_game.handle_answer(client_socket, answer)
-
-                            if self.quiz_game.current_question < len(self.quiz_game.quizzes['general']):
-                                next_question = self.quiz_game.quizzes['general'][self.quiz_game.current_question]
-                                response = {
-                                    'type': 'question',
-                                    'question': next_question['question'],
-                                    'answers': next_question['answers'],
-                                    'time_limit': next_question['time_limit']
-                                }
-                                response_body = json.dumps(response)
-                                response_header = (
-                                    'HTTP/1.1 200 OK\r\n'
-                                    'Content-Type: application/json\r\n'
-                                    f'Content-Length: {len(response_body)}\r\n'
-                                    'Access-Control-Allow-Origin: *\r\n'
-                                    'Connection: keep-alive\r\n\r\n'
-                                )
+                            # Check if body data needs further processing
+                            if body.startswith("{") and body.endswith("}"):
+                                print(f"JSON-like body data: {body}")
+    
+                                # Parse the JSON data from the body
+                                data = json.loads(body)
+                                answer = data.get('answer')
+                                print(f"Received answer from client: {answer}")
+    
+                                # Handle the answer
+                                self.quiz_game.handle_answer(client_socket, answer)
+                                # Send the next question or end of quiz
+                                if self.quiz_game.current_question < len(self.quiz_game.quizzes['general']):
+                                    next_question = self.quiz_game.quizzes['general'][self.quiz_game.current_question]
+                                    response = {
+                                        'type': 'question',
+                                        'question': next_question['question'],
+                                        'answers': next_question['answers'],
+                                        'time_limit': next_question['time_limit']
+                                    }
+                                    response_body = json.dumps(response)
+                                    response_header = (
+                                        'HTTP/1.1 200 OK\r\n'
+                                        'Content-Type: application/json\r\n'
+                                        f'Content-Length: {len(response_body)}\r\n'
+                                        'Access-Control-Allow-Origin: *\r\n'
+                                        'Connection: keep-alive\r\n\r\n'
+                                    )
+                                else:
+                                    response = {'type': 'end', 'message': 'Quiz completed'}
+                                    response_body = json.dumps(response)
+                                    response_header = (
+                                        'HTTP/1.1 200 OK\r\n'
+                                        'Content-Type: application/json\r\n'
+                                        f'Content-Length: {len(response_body)}\r\n'
+                                        'Access-Control-Allow-Origin: *\r\n'
+                                        'Connection: keep-alive\r\n\r\n'
+                                    )
+                                client_socket.sendall(response_header.encode('utf-8') + response_body.encode('utf-8'))
+    
                             else:
-                                response = {'type': 'end', 'message': 'Quiz completed'}
-                                response_body = json.dumps(response)
-                                response_header = (
-                                    'HTTP/1.1 200 OK\r\n'
-                                    'Content-Type: application/json\r\n'
-                                    f'Content-Length: {len(response_body)}\r\n'
-                                    'Access-Control-Allow-Origin: *\r\n'
-                                    'Connection: keep-alive\r\n\r\n'
-                                )
-                            client_socket.sendall(response_header.encode('utf-8') + response_body.encode('utf-8'))
-                        
+                                print(f"Unexpected data format: {body}")
+    
                         except json.JSONDecodeError as e:
                             print(f"Error decoding JSON: {e}")
                             response_body = '400 Bad Request'
@@ -151,7 +164,7 @@ class QuizServer:
                         'Connection: keep-alive\r\n\r\n'
                     )
                     client_socket.sendall(response_header.encode('utf-8') + response_body.encode('utf-8'))
-
+    
         except socket.timeout:
             print("Connection timed out. Closing connection.")
         except Exception as e:
@@ -162,6 +175,7 @@ class QuizServer:
                 client_socket.close()
             except OSError as e:
                 print(f"Error closing socket: {e}")
+    
 
     def start(self):
         print("Server starting...")
