@@ -7,6 +7,7 @@ class QuizGame:
         self.client_answers = {}  # Dictionary to track client answers
         self.quizzes = self.load_quizzes()
         self.current_question = 0
+        self.results = {}  # Store final results
 
     def load_quizzes(self):
         # Implement loading quizzes with multiple choices for each question
@@ -16,7 +17,7 @@ class QuizGame:
                     "question": "What's the capital of France?",
                     "answers": ["Paris", "London", "Berlin", "Madrid"],
                     "correct_answer": "Paris",
-                    "time_limit": 10
+                    "time_limit": 15
                 },
                 {
                     "question": "Who painted the Mona Lisa?",
@@ -28,13 +29,13 @@ class QuizGame:
                     "question": "What's the largest planet in our solar system?",
                     "answers": ["Jupiter", "Earth", "Saturn", "Mars"],
                     "correct_answer": "Jupiter",
-                    "time_limit": 12
+                    "time_limit": 15
                 },
                 {
                     "question": "What is the chemical symbol for gold?",
                     "answers": ["Au", "Ag", "Pb", "Fe"],
                     "correct_answer": "Au",
-                    "time_limit": 10
+                    "time_limit": 15
                 },
                 {
                     "question": "Who wrote 'To Kill a Mockingbird'?",
@@ -69,13 +70,13 @@ class QuizGame:
 
     def end_game(self):
         # Calculate scores
-        results = {}
+        self.results = {}
         for client, answers in self.client_answers.items():
             score = sum(
                 1 for q_index, answer in answers.items()
                 if self.quizzes['general'][q_index]['correct_answer'] == answer
             )
-            results[client.getpeername()] = score
+            self.results[client.getpeername()] = score
 
         # Send results to clients
         for client in self.clients:
@@ -83,13 +84,13 @@ class QuizGame:
                 client.send(json.dumps({
                     'type': 'results',
                     'message': 'Quiz completed',
-                    'results': results
+                    'results': self.results
                 }).encode('utf-8'))
             except OSError as e:
                 print(f"Error sending results to client {client.getpeername()}: {e}")
                 self.clients.remove(client)
                 client.close()
-
+    
         print("Quiz ended. Final results sent to all clients.")
 
     def handle_answer(self, client_socket, data):
@@ -98,13 +99,38 @@ class QuizGame:
         if client_address not in self.client_answers:
             self.client_answers[client_address] = {}
 
-        answer_data = json.loads(data)
-        question_index = answer_data.get('question_index')
-        answer = answer_data.get('answer')
+        try:
+            print(f"Received data from client {client_address}: {data}")  # Debug print
+            answer_data = json.loads(data)
+            question_index = answer_data.get('question_index')
+            answer = answer_data.get('answer')
 
-        if question_index is not None and answer:
-            self.client_answers[client_address][question_index] = answer
-            print(f"Client {client_address} answered question {question_index} with {answer}")
-    
-    def get_score(self, player_id):
-        return self.player_scores.get(player_id, 0)
+            # Check if the question_index and answer are valid
+            if question_index is not None and answer is not None:
+                if 0 <= question_index < len(self.quizzes['general']):
+                    correct_answer = self.quizzes['general'][question_index]['correct_answer']
+                    # Store the answer
+                    self.client_answers[client_address][question_index] = answer
+                    
+                    # Print for debugging
+                    if answer == correct_answer:
+                        print(f"Client {client_address} answered question {question_index} correctly with {answer}")
+                    else:
+                        print(f"Client {client_address} answered question {question_index} incorrectly with {answer}")
+                else:
+                    print(f"Invalid question index {question_index} from client {client_address}")
+            else:
+                print(f"Invalid answer data from client {client_address}: {data}")
+
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON from client {client_address}: {e}")
+        except Exception as e:
+            print(f"Exception handling answer from client {client_address}: {e}")
+
+    def get_score(self, player_address):
+        # Return the score for a specific player by their address
+        return self.results.get(player_address, 0)
+
+    def get_scores(self):
+        # Return scores for all players
+        return self.results
