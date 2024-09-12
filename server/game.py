@@ -90,7 +90,7 @@ class QuizGame:
                 print(f"Error sending results to client {client.getpeername()}: {e}")
                 self.clients.remove(client)
                 client.close()
-    
+
         print("Quiz ended. Final results sent to all clients.")
 
     def handle_answer(self, client_socket, data):
@@ -101,6 +101,9 @@ class QuizGame:
 
         try:
             print(f"Received data from client {client_address}: {data}")  # Debug print
+            # Ensure data is a string for json.loads
+            if isinstance(data, bytes):
+                data = data.decode('utf-8')
             answer_data = json.loads(data)
             question_index = answer_data.get('question_index')
             answer = answer_data.get('answer')
