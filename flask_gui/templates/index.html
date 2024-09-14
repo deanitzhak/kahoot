@@ -62,7 +62,7 @@
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('players-container');
-                    container.innerHTML = ''; // Clear previous data
+                    container.innerHTML = ''; 
 
                     data.forEach(player => {
                         const playerDiv = document.createElement('div');
@@ -82,7 +82,7 @@
                 });
         }
 
-        setInterval(updatePlayers, 1000);  // Update player info every second
+        setInterval(updatePlayers, 1000);  
     </script>
 </body>
 </html>
