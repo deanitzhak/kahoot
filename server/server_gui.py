@@ -4,6 +4,7 @@ import requests
 import json
 import threading
 import time
+import socket
 
 class ServerGUI:
     def __init__(self, master):
@@ -42,6 +43,17 @@ class ServerGUI:
 
         self.players = {}
         self.start_polling()
+    def get_ip_address():
+        """Get the IP address of the device running the server."""
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("8.8.8.8", 80))  
+            ip_address = s.getsockname()[0]
+        except Exception:
+            ip_address = "127.0.0.1"  
+        finally:
+            s.close()
+        return ip_address
 
     def start_polling(self):
         def poll_server():
@@ -53,7 +65,7 @@ class ServerGUI:
                         self.master.after(0, self.update_players, data)
                 except requests.RequestException as e:
                     print(f"Error polling server: {e}")
-                time.sleep(1)  # Poll every second
+                time.sleep(1)  
 
         thread = threading.Thread(target=poll_server)
         thread.daemon = True

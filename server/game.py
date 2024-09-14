@@ -1,6 +1,8 @@
 import json
 import time
 import random
+from questions import get_regular_questions, get_math_questions, get_science_questions, get_history_questions, get_sports_questions, get_movies_questions, get_geography_questions
+
 
 class PlayerGame:
     def __init__(self, player_id, question_type='both'):
@@ -11,57 +13,32 @@ class PlayerGame:
         self.questions = self.generate_questions(question_type)
 
     def generate_questions(self, question_type):
-        regular_questions = [
-            {
-                "question": "What's the capital of France?",
-                "answers": ["Paris", "London", "Berlin", "Madrid"],
-                "correct_answer": "Paris",
-                "time_limit": 15
-            },
-            {
-                "question": "Who painted the Mona Lisa?",
-                "answers": ["Leonardo da Vinci", "Vincent van Gogh", "Pablo Picasso", "Claude Monet"],
-                "correct_answer": "Leonardo da Vinci",
-                "time_limit": 15
-            },
-            {
-                "question": "What's the largest planet in our solar system?",
-                "answers": ["Jupiter", "Earth", "Saturn", "Mars"],
-                "correct_answer": "Jupiter",
-                "time_limit": 15
-            },
-            {
-                "question": "What is the chemical symbol for gold?",
-                "answers": ["Au", "Ag", "Pb", "Fe"],
-                "correct_answer": "Au",
-                "time_limit": 15
-            },
-            {
-                "question": "Who wrote 'To Kill a Mockingbird'?",
-                "answers": ["Harper Lee", "Mark Twain", "Ernest Hemingway", "J.D. Salinger"],
-                "correct_answer": "Harper Lee",
-                "time_limit": 15
-            }
-        ]
-
-        math_questions = []
-        for _ in range(5):  
-            num1 = random.randint(1, 10)
-            num2 = random.randint(1, 10)
-            math_questions.append({
-                "question": f"What is {num1} x {num2}?",
-                "answers": [str(num1 * num2), str(num1 * num2 - 1), str(num1 * num2 + 1), str(num1 * num2 + 2)],
-                "correct_answer": str(num1 * num2),
-                "time_limit": 10
-            })
+        regular_questions = get_regular_questions()
+        math_questions = get_math_questions()
+        science_questions = get_science_questions()
+        history_questions = get_history_questions()
+        sports_questions = get_sports_questions()
+        movies_questions = get_movies_questions()
+        geography_questions = get_geography_questions()
 
         if question_type == 'math':
             return random.sample(math_questions, min(len(math_questions), 5))
         elif question_type == 'regular':
             return random.sample(regular_questions, min(len(regular_questions), 5))
-        else:  
-            all_questions = regular_questions + math_questions
-            return random.sample(all_questions, 5)  
+        elif question_type == 'science':
+            return random.sample(science_questions, min(len(science_questions), 5))
+        elif question_type == 'history':
+            return random.sample(history_questions, min(len(history_questions), 5))
+        elif question_type == 'sports':
+            return random.sample(sports_questions, min(len(sports_questions), 5))
+        elif question_type == 'movies':
+            return random.sample(movies_questions, min(len(movies_questions), 5))
+        elif question_type == 'geography':
+            return random.sample(geography_questions, min(len(geography_questions), 5))
+        else:  # Mix all types of questions
+            all_questions = regular_questions + math_questions + science_questions + history_questions + sports_questions + movies_questions + geography_questions
+            return random.sample(all_questions, 5)
+
 
     def get_current_question(self):
         if self.current_question < len(self.questions):

@@ -1,6 +1,7 @@
 import socket
 import threading
 import json
+import time  
 from game import QuizGame
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs
@@ -80,8 +81,11 @@ class QuizServer:
                                     'type': 'end',
                                     'message': 'Quiz completed',
                                     'score': self.quiz_game.get_player_score(player_id),
-                                    'all_scores': self.quiz_game.get_all_scores()
+                                    'all_scores': self.quiz_game.get_all_scores()  
                                 }
+                                time.sleep(0)
+                                self.quiz_game.remove_player(player_id)
+                                self.quiz_game.add_player(player_id)  
                         
                         response_body = json.dumps(response)
                         response_header = (
@@ -92,7 +96,24 @@ class QuizServer:
                             'Connection: keep-alive\r\n\r\n'
                         )
                         client_socket.sendall(response_header.encode('utf-8') + response_body.encode('utf-8'))
-                    
+
+                    elif path == '/new_game':
+                        with self.lock:
+                            time.sleep(0) 
+                            self.quiz_game.remove_player(player_id)
+                            self.quiz_game.add_player(player_id)  
+                            response = {'message': 'New game started after 10 seconds'}
+                        
+                        response_body = json.dumps(response)
+                        response_header = (
+                            'HTTP/1.1 200 OK\r\n'
+                            'Content-Type: application/json\r\n'
+                            f'Content-Length: {len(response_body)}\r\n'
+                            'Access-Control-Allow-Origin: *\r\n'
+                            'Connection: keep-alive\r\n\r\n'
+                        )
+                        client_socket.sendall(response_header.encode('utf-8') + response_body.encode('utf-8'))
+
                     else:
                         response_body = '404 Not Found'
                         response_header = (
@@ -130,8 +151,11 @@ class QuizServer:
                                             'type': 'end',
                                             'message': 'Quiz completed',
                                             'score': self.quiz_game.get_player_score(player_id),
-                                            'all_scores': self.quiz_game.get_all_scores()
+                                            'all_scores': self.quiz_game.get_all_scores()  
                                         }
+                                        time.sleep(0)
+                                        self.quiz_game.remove_player(player_id)
+                                        self.quiz_game.add_player(player_id)
     
                                 response_body = json.dumps(response)
                                 response_header = (

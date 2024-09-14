@@ -1,13 +1,14 @@
 <script>
     import { onMount, onDestroy } from 'svelte';
-    import CircularProgressbar from './CircularProgressbar.svelte';
-    import ProgressBar from './ProgressBar.svelte';
-    
+    import ProgressBar from './ProgressBar.svelte';  // Progress bar indicating the number of questions completed
+
+    // Variables for quiz state
     let question = '';
     let answers = [];
     let selectedAnswer = '';
     let quizCompleted = false;
     let timeLeft = 0;
+    let totalTime = 30;
     let timer;
     let isSubmitting = false;
     let feedback = '';
@@ -15,10 +16,20 @@
     let allScores = {};
     let isLoading = true;
     let currentQuestionIndex = 0;
-    const totalQuestions = 5;
+    const totalQuestions = 5;  // Total number of questions
+
+    // Function to fetch a new game
+    async function startNewGame() {
+        isLoading = true;
+        currentQuestionIndex = 0;
+        quizCompleted = false;
+        score = 0;
+        selectedAnswer = ''; // Ensure the selected answer is reset
+        await getQuestion();  // Fetch the first question of the new game
+        isLoading = false;
+    }
 
     async function getQuestion() {
-        isLoading = true;
         try {
             const response = await fetch('http://192.168.1.105:5000/get_question');
             if (response.ok) {
@@ -27,148 +38,177 @@
                     question = data.question;
                     answers = data.answers;
                     timeLeft = data.time_limit;
+                    totalTime = data.time_limit;
                     quizCompleted = false;
                     currentQuestionIndex++;
-                    console.log(`Received question: ${question}`);
-                    console.log(`Possible answers: ${answers}`);
-                    startTimer();
+                    selectedAnswer = '';  // Reset the selected answer
+                    startTimer();  // Start the countdown timer
                 } else if (data.type === 'end') {
                     question = data.message;
                     answers = [];
                     quizCompleted = true;
                     score = data.score;
                     allScores = data.all_scores;
-                    console.log(`Quiz completed: ${question}`);
+
+                    // Show scores for 10 seconds before starting a new game
+                    await showScoresFor10Seconds();
+                    await startNewGame();
                 }
             } else {
-                console.error('Failed to fetch question');
                 feedback = 'Failed to fetch question. Please try again.';
             }
         } catch (error) {
-            console.error('Error fetching question:', error);
             feedback = 'Error fetching question. Please try again.';
         } finally {
             isLoading = false;
         }
     }
 
-    async function submitAnswer() {
-        if (selectedAnswer && !isSubmitting) {
-            isSubmitting = true;
-            feedback = 'Submitting answer...';
-            try {
-                const response = await fetch('http://192.168.1.105:5000/submit_answer', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ answer: selectedAnswer })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.type === 'question') {
-                        question = data.question;
-                        answers = data.answers;
-                        timeLeft = data.time_limit;
-                        selectedAnswer = '';
-                        feedback = 'Answer submitted successfully!';
-                        currentQuestionIndex++;
-                        console.log(`Received next question: ${question}`);
-                        console.log(`Possible answers: ${answers}`);
-                        startTimer();
-                    } else if (data.type === 'end') {
-                        question = data.message;
-                        answers = [];
-                        quizCompleted = true;
-                        score = data.score;
-                        allScores = data.all_scores;
-                        feedback = 'Quiz completed!';
-                        console.log(`Quiz completed: ${question}`);
-                    }
-                } else {
-                    console.error('Failed to submit answer');
-                    feedback = 'Failed to submit answer. Please try again.';
-                }
-            } catch (error) {
-                console.error('Error submitting answer:', error);
-                feedback = 'Error submitting answer. Please try again.';
-            } finally {
-                isSubmitting = false;
-            }
-        }
+    async function showScoresFor10Seconds() {
+        // Wait for 10 seconds before starting a new game
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve();
+            }, 3000);  // 10 seconds delay
+        });
     }
 
     function startTimer() {
-        clearInterval(timer);
+        clearInterval(timer);  // Clear any existing timers
         timer = setInterval(() => {
             if (timeLeft > 0) {
                 timeLeft--;
             } else {
                 clearInterval(timer);
-                submitAnswer();
+                autoSubmitAnswer();  // Automatically submit when time runs out
             }
         }, 1000);
     }
 
-    onMount(() => {
-        getQuestion();
+    function autoSubmitAnswer() {
+        if (!selectedAnswer) {
+            // If no answer selected, randomly select one
+            const randomIndex = Math.floor(Math.random() * answers.length);
+            selectedAnswer = answers[randomIndex];
+        }
+        submitAnswer();  // Automatically submit the answer
+    }
+
+    async function submitAnswer() {
+        if (isSubmitting) return;
+        if (!selectedAnswer) {
+            feedback = 'Please select an answer before submitting.';
+            return;
+        }
+        isSubmitting = true;
+        feedback = 'Submitting answer...';
+        try {
+            const response = await fetch('http://192.168.1.105:5000/submit_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ answer: selectedAnswer })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.type === 'question') {
+                    question = data.question;
+                    answers = data.answers;
+                    timeLeft = data.time_limit;
+                    totalTime = data.time_limit;
+                    selectedAnswer = '';  // Reset selected answer
+                    feedback = '';
+                    startTimer();  // Reset the timer for the new question
+                } else if (data.type === 'end') {
+                    question = data.message;
+                    answers = [];
+                    quizCompleted = true;
+                    score = data.score;
+                    allScores = data.all_scores;
+
+                    // Show scores for 10 seconds before starting a new game
+                    await showScoresFor10Seconds();
+                    await startNewGame();
+                }
+            } else {
+                feedback = 'Failed to submit answer. Please try again.';
+            }
+        } catch (error) {
+            feedback = 'Error submitting answer. Please try again.';
+        } finally {
+            isSubmitting = false;
+        }
+    }
+
+    function selectAnswer(answer) {
+        if (!isSubmitting) {
+            selectedAnswer = answer;  // Allow immediate answer selection
+        }
+    }
+
+    // Function to return the desired color based on the index
+    function getColor(index) {
+        const colors = ['#DFFFEC', '#FF9797', '#F9DADA', '#D4C6FE'];  // Your preferred colors
+        return colors[index % colors.length];  // Rotate through the colors
+    }
+
+    onMount(async () => {
+        await getQuestion();
     });
 
     onDestroy(() => {
-        clearInterval(timer);
+        clearTimeout(timer);
     });
-
-    const colors = ['#DFFFEC', '#FF9797', '#F9DADA', '#D4C6FE'];
 </script>
 
 <main>
     {#if isLoading}
-        <div class="loading">
-            <CircularProgressbar value={100} maxValue={100} text="Loading..." />
-        </div>
-    {:else if !quizCompleted}
-        <h1 class="title">Quiz Question</h1>
-        <ProgressBar current={currentQuestionIndex} total={totalQuestions} />
-        <p class="question">{question}</p>
-        <p class="timer">Time left: {timeLeft} seconds</p>
-        <div class="answers-container">
-            {#each answers as answer, index}
-                <div class="answer-block" style="background-color: {colors[index % colors.length]};">
-                    <input type="radio" id={`answer${index}`} name="answer" value={answer} bind:group={selectedAnswer} />
-                    <label for={`answer${index}`} class="answer-text">{answer}</label>
-                </div>
-            {/each}
-        </div>
-        <button class="submit-button" on:click={submitAnswer} disabled={isSubmitting || !selectedAnswer}>
-            {isSubmitting ? 'Submitting...' : 'Submit Answer'}
-        </button>
-        {#if feedback}
-            <p class="feedback">{feedback}</p>
-        {/if}
+        <div class="loading">Loading...</div>
     {:else}
-        <h1 class="title">Quiz Completed</h1>
-        <p class="question">{question}</p>
-        <p class="score">Your score: {score}</p>
-        <h2>All Scores:</h2>
-        <ul>
-            {#each Object.entries(allScores) as [player, playerScore]}
-                <li>{player}: {playerScore} points</li>
-            {/each}
-        </ul>
+        <div>
+            {#if quizCompleted}
+                <h2>Quiz completed! Your score: {score}</h2>
+                <h3>All Players' Scores:</h3>
+                <ul>
+                    {#each Object.entries(allScores) as [player, playerScore]}
+                        <li>{player}: {playerScore} points</li>
+                    {/each}
+                </ul>
+                <button class="submit-button" on:click={startNewGame}>Start New Game</button>
+            {:else}
+                <h1 class="question">{question}</h1>
+                <p class="timer">Time left: {timeLeft} seconds</p>  <!-- Display remaining time as a number -->
+                <ProgressBar current={currentQuestionIndex} total={totalQuestions} />  <!-- Progress bar for question count -->
+                <div class="answers-container">
+                    {#each answers as answer, index}
+                        <button 
+                            class="answer-block {selectedAnswer === answer ? 'selected' : ''}" 
+                            style="background-color: {getColor(index)};"  
+                            on:click={() => selectAnswer(answer)}>
+                            <span class="answer-text">{answer}</span>
+                        </button>
+                    {/each}
+                </div>
+                <button 
+                    class="submit-button" 
+                    on:click={submitAnswer} 
+                    disabled={!selectedAnswer || isSubmitting}>
+                    {isSubmitting ? 'Submitting...' : 'Submit Answer'}
+                </button>
+                {#if feedback}
+                    <p class="feedback">{feedback}</p>
+                {/if}
+            {/if}
+        </div>
     {/if}
 </main>
 
 <style>
-    .title {
-        font-size: 24px;
-        margin-bottom: 20px;
-        text-align: center;
-        color: black;
-    }
     .question {
         font-size: 18px;
         margin-bottom: 15px;
+        text-align: center;
     }
     .timer {
         font-size: 16px;
@@ -183,7 +223,7 @@
         align-items: center;
         gap: 20px;
         width: 100%;
-        height: 30vh;
+        margin-bottom: 20px;
     }
     .answer-block {
         width: 150px;
@@ -194,34 +234,36 @@
         justify-content: center;
         padding: 15px;
         border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;
+        text-align: center;
+        border: 2px solid #D3D3D3; /* Border color */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .answer-block:hover {
         transform: translateY(-5px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     }
+    .answer-block.selected {
+        border: 3px solid #fdd1d9; 
+    }
     .answer-text {
-        margin-top: 10px;
-        text-align: center;
         font-weight: bold;
+        text-align: center;
     }
     .submit-button {
-        background-color: #030303;
+        background-color: #201c1f;
         color: white;
         width: 200px;
         border: none;
         cursor: pointer;
-    }
-    input[type="radio"] {
-        display: none;
-    }
-    input[type="radio"]:checked + .answer-text {
-        color: #ffffff;
+        padding: 10px;
+        font-size: 16px;
+        margin: 0 auto;
+        display: block;
     }
     .submit-button:hover:not(:disabled) {
-        background-color: #3e463f;
+        background-color: #52494e;
     }
     .submit-button:disabled {
         background-color: #cccccc;
@@ -231,20 +273,20 @@
         margin-top: 10px;
         font-style: italic;
         color: #666;
-    }
-    h2 {
         text-align: center;
     }
-    li {
+    ul {
         text-align: center;
         list-style-type: none;
-        color: rgb(0, 0, 0);
+        padding: 0;
     }
-    .score {
-        font-size: 20px;
-        font-weight: bold;
-        margin-top: 20px;
+    ul li {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+    h2, h3 {
         text-align: center;
+        margin-top: 20px;
     }
     .loading {
         display: flex;

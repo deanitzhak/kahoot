@@ -6,7 +6,7 @@ import time
 app = Flask(__name__)
 
 players_data = []
-url = "http://http://192.168.1.105:5000/get_status"  
+url = "http://192.168.1.105:5000/get_status"  
 
 def poll_server():
     global players_data
