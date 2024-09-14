@@ -1,0 +1,28 @@
+version: '3'
+services:
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    networks:
+      - quiz_network
+
+  flask_gui:
+    build: ./flask_gui
+    ports:
+      - "5002:5002"
+    depends_on:
+      - server
+    networks:
+      - quiz_network
+
+  svelte_client:
+    build: ./client/svelte-client
+    ports:
+      - "8080:8080"
+    networks:
+      - quiz_network
+
+networks:
+  quiz_network:
+    driver: bridge

@@ -7,10 +7,11 @@ class PlayerGame:
         self.player_id = player_id
         self.current_question = 0
         self.score = 0
+        self.last_answer = None  # Store the last answer
         self.questions = self.generate_questions()
 
     def generate_questions(self):
-        all_questions = [
+        regular_questions = [
             {
                 "question": "What's the capital of France?",
                 "answers": ["Paris", "London", "Berlin", "Madrid"],
@@ -42,7 +43,22 @@ class PlayerGame:
                 "time_limit": 15
             }
         ]
-        return random.sample(all_questions, 5)  # Randomly select 5 questions
+
+        # Generate random basic math questions (multiplication)
+        math_questions = []
+        for _ in range(5):  # Generate 5 random math questions
+            num1 = random.randint(1, 10)
+            num2 = random.randint(1, 10)
+            math_questions.append({
+                "question": f"What is {num1} x {num2}?",
+                "answers": [str(num1 * num2), str(num1 * num2 - 1), str(num1 * num2 + 1), str(num1 * num2 + 2)],
+                "correct_answer": str(num1 * num2),
+                "time_limit": 10
+            })
+
+        # Combine regular and math questions and pick randomly
+        all_questions = regular_questions + math_questions
+        return random.sample(all_questions, 5)  # Randomly select 5 questions from the combined list
 
     def get_current_question(self):
         if self.current_question < len(self.questions):
@@ -51,12 +67,16 @@ class PlayerGame:
 
     def answer_question(self, answer):
         if self.current_question < len(self.questions):
+            self.last_answer = answer  # Store the player's answer
             correct_answer = self.questions[self.current_question]['correct_answer']
             if answer == correct_answer:
                 self.score += 1
             self.current_question += 1
             return self.current_question < len(self.questions)
         return False
+
+    def get_last_answer(self):
+        return self.last_answer  # Return the last answer
 
     def get_score(self):
         return self.score
@@ -90,6 +110,11 @@ class QuizGame:
         if player_id in self.players:
             return self.players[player_id].get_score()
         return 0
+
+    def get_player_last_answer(self, player_id):
+        if player_id in self.players:
+            return self.players[player_id].get_last_answer()
+        return None
 
     def get_all_scores(self):
         return {player_id: player.get_score() for player_id, player in self.players.items()}

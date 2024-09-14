@@ -2,6 +2,8 @@ import socket
 import threading
 import json
 from game import QuizGame
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import parse_qs
 
 class QuizServer:
     def __init__(self, host='0.0.0.0', port=5000):
@@ -14,7 +16,7 @@ class QuizServer:
         print(f"Server listening on {self.host}:{self.port}")
         self.quiz_game = QuizGame()
         self.lock = threading.Lock()
-    
+
     def handle_client(self, client_socket):
         print("Handling new client connection.")
         player_id = client_socket.getpeername()[0]
@@ -31,7 +33,7 @@ class QuizServer:
                     )
                     client_socket.sendall(response_header.encode('utf-8') + response_body.encode('utf-8'))
                     return
-    
+
             while True:
                 request = client_socket.recv(1024).decode('utf-8')
                 if not request:
@@ -189,8 +191,7 @@ class QuizServer:
             except OSError as e:
                 print(f"Error closing socket: {e}")
 
-    def start(self):
-        print("Server starting...")
+    def run_http_server(self):
         while True:
             try:
                 client_socket, addr = self.server_socket.accept()
@@ -201,6 +202,46 @@ class QuizServer:
                 print("Server accept timeout occurred")
             except Exception as e:
                 print(f"Exception accepting connection: {e}")
+
+    def start(self):
+        print("Server starting...")
+        server_thread = threading.Thread(target=self.run_http_server)
+        server_thread.start()
+
+        # Start the GUI HTTP server
+        gui_server = HTTPServer(('localhost', 5001), GUIRequestHandler)
+        gui_server.quiz_server = self
+        print("GUI server started on port 5001")
+        gui_server.serve_forever()
+
+class GUIRequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/get_status':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            with self.server.quiz_server.lock:
+                status = []
+                for player_id, player in self.server.quiz_server.quiz_game.players.items():
+                    status.append({
+                        'player_id': player_id,
+                        'score': self.server.quiz_server.quiz_game.get_player_score(player_id),
+                        'current_question': player.current_question,
+                        'last_answer': getattr(player, 'last_answer', None)
+                    })
+            
+            self.wfile.write(json.dumps(status).encode())
+        else:
+            self.send_error(404)
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
 
 if __name__ == "__main__":
     server = QuizServer()

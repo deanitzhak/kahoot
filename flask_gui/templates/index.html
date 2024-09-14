@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Server GUI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .player {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .player-header {
+            font-weight: bold;
+            color: #584294;
+        }
+        .player-info {
+            margin-top: 5px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 5px;
+            position: relative;
+        }
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            background-color: #584294;
+            border-radius: 5px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz Server Status</h1>
+        <div id="players-container"></div>
+    </div>
+    <script>
+        function updatePlayers() {
+            fetch('/get_status')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('players-container');
+                    container.innerHTML = ''; // Clear previous data
+
+                    data.forEach(player => {
+                        const playerDiv = document.createElement('div');
+                        playerDiv.className = 'player';
+                        playerDiv.innerHTML = `
+                            <div class="player-header">Player: ${player.player_id}</div>
+                            <div class="player-info">Score: ${player.score}</div>
+                            <div class="player-info">Question: ${player.current_question + 1}/5</div>
+                            <div class="player-info">Last Answer: ${player.last_answer || 'None'}</div>
+                            <div class="progress-bar">
+                                <span style="width: ${((player.current_question + 1) / 5) * 100}%;"></span>
+                            </div>
+                            <div class="player-info">${player.current_question >= 5 ? `Game Over! Final Score: ${player.score}` : ''}</div>
+                        `;
+                        container.appendChild(playerDiv);
+                    });
+                });
+        }
+
+        setInterval(updatePlayers, 1000);  // Update player info every second
+    </script>
+</body>
+</html>

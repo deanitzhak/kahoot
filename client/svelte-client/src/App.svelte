@@ -10,6 +10,5 @@
   </main>
   
   <style>
-	/* Add some basic styling */
   </style>
   
