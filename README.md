@@ -5,13 +5,13 @@
     The server handles HTTP-like requests over a TCP connection, 
     responds with custom headers and JSON-encoded data, and manages multiple clients via threads.
 
-## Features
+# Features
     .   Max Players: 5 players per session
     .   Answer Timer: 15 seconds to submit an answer
     .   Reconnect Logic: After the quiz ends, the socket automatically closes and reopens for new players if needed. 
         If no response is received, the socket closes automatically.
     
-## Running the Application
+# Running the Application
     There are two ways to run the application: locally or using Docker and Docker Compose.
     1.  Running Locally
         To run the app locally, use the <start.sh> bash script. Here's how:
@@ -25,6 +25,8 @@
             .   The Svelte front-end will be accessible at http://<your_ip_address>:8000.
             .   The Tkinter GUI for the server will automatically open.
 
+## bash ./start.sh
+
     2.  Running with Docker and Docker Compose
         To run the app using Docker, follow these steps:
             1. Stop any previous instances:
@@ -37,7 +39,11 @@
         The Svelte front-end will be available at http://localhost:5003.
         The TCP server will be running on port 5000.
 
-## Components Overview
+## docker-compose down
+## docker-compose build
+## docker-compose up
+
+# Components Overview
     1.  Backend (Python TCP Server)
         The backend is a TCP server that listens for incoming connections using socket.
         AF_INET (IPv4) and socket.SOCK_STREAM (TCP). 
@@ -50,15 +56,15 @@
             .   Port 8000 when running locally
             .   Port 5003 when running via Docker
 
-## Server GUI
+# Server GUI
     The Tkinter-based GUI for the server opens automatically when running the app via the bash script,
     or it is hosted on Flask when running with Docker at port 5002.
 
 
 
-## Additional Information
+# Additional Information
     After each quiz round, players can reconnect if they wish to start a new game.
     If no response is received from a player, the socket connection will automatically close after the timeout period
 
-## License
+# License
     This project is licensed under the MIT License.
