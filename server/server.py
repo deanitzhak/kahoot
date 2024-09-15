@@ -4,7 +4,6 @@ import json
 import time  
 from game import QuizGame
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import parse_qs
 
 class QuizServer:
     def __init__(self, host='0.0.0.0', port=5000):
@@ -153,6 +152,7 @@ class QuizServer:
                                             'score': self.quiz_game.get_player_score(player_id),
                                             'all_scores': self.quiz_game.get_all_scores()  
                                         }
+                                        # after the quiz is completed, remove the player and add them back to the game
                                         time.sleep(0)
                                         self.quiz_game.remove_player(player_id)
                                         self.quiz_game.add_player(player_id)
@@ -201,7 +201,7 @@ class QuizServer:
                         'Connection: keep-alive\r\n\r\n'
                     )
                     client_socket.sendall(response_header.encode('utf-8') + response_body.encode('utf-8'))
-    
+        # socket timeout exception will occur when the client connection is closed
         except socket.timeout:
             print("Connection timed out. Closing connection.")
         except Exception as e:
@@ -232,12 +232,11 @@ class QuizServer:
         server_thread = threading.Thread(target=self.run_http_server)
         server_thread.start()
 
-        # Start the GUI HTTP server
-        gui_server = HTTPServer(('localhost', 5001), GUIRequestHandler)
+        gui_server = HTTPServer(('0.0.0.0', 5001), GUIRequestHandler)  
         gui_server.quiz_server = self
         print("GUI server started on port 5001")
         gui_server.serve_forever()
-
+# A class to handle HTTP requests from the GUI flask app or tkinter client
 class GUIRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/get_status':

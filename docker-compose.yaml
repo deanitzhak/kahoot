@@ -1,12 +1,5 @@
 version: '3'
 services:
-  server:
-    build: ./server
-    ports:
-      - "5000:5000"
-    networks:
-      - quiz_network
-
   flask_gui:
     build: ./flask_gui
     ports:
@@ -15,11 +8,25 @@ services:
       - server
     networks:
       - quiz_network
+    environment:
+      - FLASK_ENV=development  
+      - FLASK_RUN_PORT=5002
+      - FLASK_RUN_HOST=0.0.0.0  
+
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    networks:
+      - quiz_network
 
   svelte_client:
     build: ./client/svelte-client
     ports:
-      - "8080:8080"
+      - "5003:5003"
+    depends_on:
+      - flask_gui
     networks:
       - quiz_network
 

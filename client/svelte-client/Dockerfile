@@ -1,23 +1,25 @@
-# Use the official Node.js image
-FROM node:16
+# Use a Node.js image
+FROM node:16-alpine
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the package.json and package-lock.json
+# Copy package.json and install dependencies
 COPY package*.json ./
 
-# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Copy the entire app to the container
 COPY . .
 
-# Build the application
+# Build the Svelte app for production
 RUN npm run build
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Use a simple Node.js HTTP server for serving the built app
+RUN npm install -g serve
 
-# Command to run the app
-CMD ["npm", "start"]
+# Expose port 5003
+EXPOSE 5003
+
+# Serve the app
+CMD ["serve", "-s", "public", "-l", "5003"]

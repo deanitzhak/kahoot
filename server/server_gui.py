@@ -5,11 +5,12 @@ import json
 import threading
 import time
 import socket
-
+# from server_gui 
+# run automatically when bash start.sh is running is started
 class ServerGUI:
     def __init__(self, master):
         self.master = master
-        master.title("Quiz Server GUI")
+        master.title("Dean's Quiz Server GUI")
         master.geometry("900x600")
         master.configure(bg='#f0f0f0')
 
@@ -65,8 +66,9 @@ class ServerGUI:
                         self.master.after(0, self.update_players, data)
                 except requests.RequestException as e:
                     print(f"Error polling server: {e}")
+                # Poll every second
                 time.sleep(1)  
-
+        # Start polling thread
         thread = threading.Thread(target=poll_server)
         thread.daemon = True
         thread.start()

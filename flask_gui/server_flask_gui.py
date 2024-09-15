@@ -3,10 +3,13 @@ import requests
 import threading
 import time
 
+# A flask server that will serve the GUI for the game 
+# and will poll the game server for the players' status
+# will run automatically when the docker container is started
 app = Flask(__name__)
 
 players_data = []
-url = "http://192.168.1.105:5000/get_status"  
+url = "http://server:5001/get_status"
 
 def poll_server():
     global players_data

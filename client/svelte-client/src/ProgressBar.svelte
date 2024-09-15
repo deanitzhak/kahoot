@@ -20,7 +20,7 @@
 
     .progress-bar {
         height: 100%;
-        background-color: #584294;
+        background-color: #fdd1d9;
         border-radius: 5px;
         transition: width 0.3s ease;
     }
