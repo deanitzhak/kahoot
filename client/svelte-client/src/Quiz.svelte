@@ -1,8 +1,7 @@
 <script>
     import { onMount, onDestroy } from 'svelte';
-    import ProgressBar from './ProgressBar.svelte';  // Progress bar indicating the number of questions completed
+    import ProgressBar from './ProgressBar.svelte';  
 
-    // Variables for quiz state
     let question = '';
     let answers = [];
     let selectedAnswer = '';
@@ -16,16 +15,15 @@
     let allScores = {};
     let isLoading = true;
     let currentQuestionIndex = 0;
-    const totalQuestions = 5;  // Total number of questions
+    const totalQuestions = 5;  
 
-    // Function to fetch a new game
     async function startNewGame() {
         isLoading = true;
         currentQuestionIndex = 0;
         quizCompleted = false;
         score = 0;
-        selectedAnswer = ''; // Ensure the selected answer is reset
-        await getQuestion();  // Fetch the first question of the new game
+        selectedAnswer = ''; 
+        await getQuestion(); 
         isLoading = false;
     }
 
@@ -41,8 +39,8 @@
                     totalTime = data.time_limit;
                     quizCompleted = false;
                     currentQuestionIndex++;
-                    selectedAnswer = '';  // Reset the selected answer
-                    startTimer();  // Start the countdown timer
+                    selectedAnswer = '';  
+                    startTimer();  
                 } else if (data.type === 'end') {
                     question = data.message;
                     answers = [];
@@ -50,7 +48,6 @@
                     score = data.score;
                     allScores = data.all_scores;
 
-                    // Show scores for 10 seconds before starting a new game
                     await showScoresFor10Seconds();
                     await startNewGame();
                 }
@@ -65,33 +62,31 @@
     }
 
     async function showScoresFor10Seconds() {
-        // Wait for 10 seconds before starting a new game
         return new Promise((resolve) => {
             setTimeout(() => {
                 resolve();
-            }, 3000);  // 10 seconds delay
+            }, 3000);  
         });
     }
 
     function startTimer() {
-        clearInterval(timer);  // Clear any existing timers
+        clearInterval(timer);  
         timer = setInterval(() => {
             if (timeLeft > 0) {
                 timeLeft--;
             } else {
                 clearInterval(timer);
-                autoSubmitAnswer();  // Automatically submit when time runs out
+                autoSubmitAnswer();  
             }
         }, 1000);
     }
 
     function autoSubmitAnswer() {
         if (!selectedAnswer) {
-            // If no answer selected, randomly select one
             const randomIndex = Math.floor(Math.random() * answers.length);
             selectedAnswer = answers[randomIndex];
         }
-        submitAnswer();  // Automatically submit the answer
+        submitAnswer();  
     }
 
     async function submitAnswer() {
@@ -117,9 +112,9 @@
                     answers = data.answers;
                     timeLeft = data.time_limit;
                     totalTime = data.time_limit;
-                    selectedAnswer = '';  // Reset selected answer
+                    selectedAnswer = ''; 
                     feedback = '';
-                    startTimer();  // Reset the timer for the new question
+                    startTimer();  
                 } else if (data.type === 'end') {
                     question = data.message;
                     answers = [];
@@ -127,7 +122,6 @@
                     score = data.score;
                     allScores = data.all_scores;
 
-                    // Show scores for 10 seconds before starting a new game
                     await showScoresFor10Seconds();
                     await startNewGame();
                 }
@@ -143,14 +137,13 @@
 
     function selectAnswer(answer) {
         if (!isSubmitting) {
-            selectedAnswer = answer;  // Allow immediate answer selection
+            selectedAnswer = answer;  
         }
     }
 
-    // Function to return the desired color based on the index
     function getColor(index) {
-        const colors = ['#DFFFEC', '#FF9797', '#F9DADA', '#D4C6FE'];  // Your preferred colors
-        return colors[index % colors.length];  // Rotate through the colors
+        const colors = ['#DFFFEC', '#FF9797', '#F9DADA', '#D4C6FE'];  
+        return colors[index % colors.length];  
     }
 
     onMount(async () => {
@@ -178,8 +171,8 @@
                 <button class="submit-button" on:click={startNewGame}>Start New Game</button>
             {:else}
                 <h1 class="question">{question}</h1>
-                <p class="timer">Time left: {timeLeft} seconds</p>  <!-- Display remaining time as a number -->
-                <ProgressBar current={currentQuestionIndex} total={totalQuestions} />  <!-- Progress bar for question count -->
+                <p class="timer">Time left: {timeLeft} seconds</p> 
+                <ProgressBar current={currentQuestionIndex} total={totalQuestions} />  
                 <div class="answers-container">
                     {#each answers as answer, index}
                         <button 
@@ -237,7 +230,7 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;
         text-align: center;
-        border: 2px solid #D3D3D3; /* Border color */
+        border: 2px solid #D3D3D3; 
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .answer-block:hover {
