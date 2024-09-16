@@ -236,7 +236,7 @@ class QuizServer:
         gui_server.quiz_server = self
         print("GUI server started on port 5001")
         gui_server.serve_forever()
-# A class to handle HTTP requests from the GUI flask app or tkinter client
+# inner class to handle HTTP requests from the GUI flask app or tkinter client
 class GUIRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/get_status':

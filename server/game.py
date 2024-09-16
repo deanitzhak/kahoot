@@ -11,7 +11,7 @@ class PlayerGame:
         self.last_answer = None  
         self.questions = self.generate_questions(question_type)
 
-    # Generate a list of questions based on the specified type
+    # generate a list of questions based on the specified type
     def generate_questions(self, question_type):
         regular_questions = get_regular_questions()
         math_questions = get_math_questions()
@@ -39,13 +39,13 @@ class PlayerGame:
             all_questions = regular_questions + math_questions + science_questions + history_questions + sports_questions + movies_questions + geography_questions
             return random.sample(all_questions, 5)
 
-    # Get the current question for the player
+    # get the current question for the player
     def get_current_question(self):
         if self.current_question < len(self.questions):
             return self.questions[self.current_question]
         return None
 
-    # Handle the player's answer and update the score
+    # handle the player's answer and update the score
     def answer_question(self, answer):
         if self.current_question < len(self.questions):
             self.last_answer = answer  
@@ -67,42 +67,42 @@ class QuizGame:
         self.players = {}
         self.max_players = 5
 
-    # Add a new player to the game
+    # add a new player to the game
     def add_player(self, player_id, question_type='both'):
         if len(self.players) < self.max_players:
             self.players[player_id] = PlayerGame(player_id, question_type)
             return True
         return False
 
-    # Remove a player from the game
+    # remove a player from the game
     def remove_player(self, player_id):
         if player_id in self.players:
             del self.players[player_id]
 
-    # Get the current question for a specific player
+    # get the current question for a specific player
     def get_question(self, player_id):
         if player_id in self.players:
             return self.players[player_id].get_current_question()
         return None
 
-    # Handle the answer for a specific player
+    # handle the answer for a specific player
     def handle_answer(self, player_id, answer):
         if player_id in self.players:
             return self.players[player_id].answer_question(answer)
         return False
 
-    # Get the score for a specific player
+    # get the score for a specific player
     def get_player_score(self, player_id):
         if player_id in self.players:
             return self.players[player_id].get_score()
         return 0
 
-    # Get the last answer for a specific player
+    # get the last answer for a specific player
     def get_player_last_answer(self, player_id):
         if player_id in self.players:
             return self.players[player_id].get_last_answer()
         return None
 
-    # Get the scores for all players
+    # get the scores for all players
     def get_all_scores(self):
         return {player_id: player.get_score() for player_id, player in self.players.items()}

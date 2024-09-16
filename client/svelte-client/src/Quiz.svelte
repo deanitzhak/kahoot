@@ -1,7 +1,7 @@
 <script>
     import { onMount, onDestroy } from 'svelte';
     import ProgressBar from './ProgressBar.svelte';
-    //if you want run these via localhost, you can change the ip_address to 'your_ip_device_host:5000'
+    // if you want run these via localhost, you can change the ip_address to 'your_ip_device_host:5000'
     import { ip_address } from './API.svelte';
     const ip_address_module = ip_address;
     let question = '';
@@ -19,7 +19,7 @@
     let currentQuestionIndex = 0;
     const totalQuestions = 5;
 
-    // Start a new game by resetting variables and fetching the first question
+    // start a new game by resetting variables and fetching the first question
     async function startNewGame() {
         isLoading = true;
         currentQuestionIndex = 0;
@@ -32,7 +32,7 @@
         isLoading = false;
     }
 
-    // Fetch a new question from the server
+    // fetch a new question from the server
     async function getQuestion() {
         clearInterval(timer);  
         try {
@@ -61,7 +61,7 @@
         }
     }
 
-    // Handle the end of the quiz
+    // handle the end of the quiz
     function handleEndOfQuiz(data) {
         question = data.message;
         answers = [];
@@ -73,7 +73,7 @@
         }, 3000);
     }
 
-    // Start the countdown timer for the current question
+    // start the countdown timer for the current question
     function startTimer() {
         clearInterval(timer);  
         timer = setInterval(() => {
@@ -86,7 +86,7 @@
         }, 1000);
     }
 
-    // Automatically submit an answer if time runs out
+    // automatically submit an answer if time runs out
     function autoSubmitAnswer() {
         if (!selectedAnswer) {
             const randomIndex = Math.floor(Math.random() * answers.length);
@@ -95,7 +95,7 @@
         submitAnswer();  
     }
 
-    // Submit the selected answer to the server
+    // submit the selected answer to the server
     async function submitAnswer() {
         if (isSubmitting) return;
         if (!selectedAnswer) {
@@ -131,7 +131,7 @@
         }
     }
 
-    // Update the question data after submitting an answer
+    // update the question data after submitting an answer
     function updateQuestionData(data) {
         question = data.question;
         answers = data.answers;
@@ -143,25 +143,25 @@
         startTimer();
     }
 
-    // Select an answer
+    // select an answer
     function selectAnswer(answer) {
         if (!isSubmitting) {
             selectedAnswer = answer;  
         }
     }
 
-    // Get color for answer blocks
+    // get color for answer blocks
     function getColor(index) {
         const colors = ['#DFFFEC', '#FF9797', '#F9DADA', '#D4C6FE'];  
         return colors[index % colors.length];  
     }
 
-    // Fetch the first question when the component mounts
+    // fetch the first question when the component mounts
     onMount(async () => {
         await getQuestion();
     });
 
-    // Clear the timer when the component is destroyed
+    // clear the timer when the component is destroyed
     onDestroy(() => {
         clearInterval(timer);
     });

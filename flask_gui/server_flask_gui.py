@@ -3,7 +3,7 @@ import requests
 import threading
 import time
 
-# A flask server that will serve the GUI for the game 
+# a flask server that will serve the GUI for the game 
 # and will poll the game server for the players' status
 # will run automatically when the docker container is started
 app = Flask(__name__)

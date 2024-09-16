@@ -66,9 +66,9 @@ class ServerGUI:
                         self.master.after(0, self.update_players, data)
                 except requests.RequestException as e:
                     print(f"Error polling server: {e}")
-                # Poll every second
+                # poll every second
                 time.sleep(1)  
-        # Start polling thread
+        # start polling thread
         thread = threading.Thread(target=poll_server)
         thread.daemon = True
         thread.start()
