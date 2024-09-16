@@ -58,11 +58,11 @@ responds with custom headers and JSON-encoded data, and manages multiple clients
    2.  Running with Docker and Docker Compose
        To run the app using Docker, follow these steps:
            1. Stop any previous instances:
-               .   docker-compose down
+               ## docker-compose down
            2.  Build the Docker containers:
-               .   docker-compose build
+               ## docker-compose build
            3.  Start the application:
-               .   docker-compose up
+               ## docker-compose up
        The Flask app (which holds the server GUI) will be running at http://localhost:5002 or your local IP.
        The Svelte front-end will be available at http://localhost:5003.
        The TCP server will be running on port 5000.
