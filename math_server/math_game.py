@@ -27,10 +27,12 @@ class MathPlayerGame:
 
     def get_score(self):
         return self.score
+
     def start_new_game(self):
-        self.players.clear()  # Clear existing players
-        self.current_question_index = 0  # Reset question index
-        self.load_questions()  # Reload questions for the new game
+        self.questions = self.generate_questions()  # Reload new questions
+        self.current_question = 0  # Reset the question index
+        self.score = 0  # Reset score
+
 
 class MathQuizGame:
     def __init__(self):
@@ -73,8 +75,8 @@ if __name__ == "__main__":
     game.add_player("Player1")
     game.add_player("Player2")
     
-    # Game loop
-    for round in range(5):  # 5 rounds of questions
+    # Game loop for 5 rounds of questions
+    for round in range(5):  # 5 rounds
         for player_id in game.players.keys():
             question = game.get_question(player_id)
             if question:
