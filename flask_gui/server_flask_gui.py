@@ -9,7 +9,7 @@ import time
 app = Flask(__name__)
 
 players_data = []
-url = "http://server:5001/get_status"
+url = "http://localhost:5001/get_status"
 
 def poll_server():
     global players_data
