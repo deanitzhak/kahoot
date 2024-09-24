@@ -9,6 +9,8 @@ COPY package*.json ./
 
 RUN npm install
 
+RUN npm install dotenv
+
 # Copy the entire app to the container
 COPY . .
 

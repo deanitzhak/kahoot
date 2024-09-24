@@ -124,4 +124,7 @@ instance/
 # Miscellaneous
 *.DS_Store
 *.lock
-git 
+
+# Ignore files with .Identifier extension
+*.Identifier
+*:*Identifier

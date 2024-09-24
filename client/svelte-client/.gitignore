@@ -2,3 +2,10 @@
 /public/build/
 
 .DS_Store
+
+# Ignore files with .Identifier extension
+*.Identifier
+*:*Identifier
+
+# Environment variables
+src/.env
