@@ -107,5 +107,7 @@ or it is hosted on Flask when running with Docker at port `5002`.
 After each quiz round, players can reconnect if they wish to start a new game.  
 If no response is received from a player, the socket connection will automatically close after the timeout period.
 
+## Link for explain
+  https://drive.google.com/file/d/1Mxz6PUoGBwxGNF7aB9g_oW43ZXax0QDe/view?usp=sharing
 ## License
 This project is licensed under the MIT License.
